@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老周的小铺 · 造物原型</title>
+<style>
+  :root{
+    --paper:#F6F1E7; --paper-2:#EFE7D8; --ink:#22201B; --ink-2:#5C5648;
+    --accent:#B4552D; --line:#D8CDB8; --green:#3E7A4E; --amber:#B98A2F;
+    --red:#B04A3C; --blue:#3E6B8A; --card:#FFFDF7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.7}
+  .serif{font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+  .topbar{background:var(--ink);color:#EDE6D6;padding:10px 24px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:9}
+  .topbar b{font-size:16px;letter-spacing:1px}
+  .topbar a{color:#CFC5AE;text-decoration:none;font-size:13px}
+  .topbar a:hover{color:#fff}
+  .topbar .sp{flex:1}
+  .proto-note{font-size:11px;color:#9A917C;border:1px solid #4A4536;padding:1px 8px;border-radius:99px}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 24px}
+
+  /* 铺头 */
+  .shophead{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 30px;margin-bottom:20px}
+  .shophead h1{font-size:30px;letter-spacing:2px}
+  .shophead .intro{color:var(--ink-2);margin-top:6px;font-size:14px}
+  .shophead .stats{display:flex;gap:26px;margin-top:14px;flex-wrap:wrap}
+  .shophead .stats div b{font-size:20px;color:var(--accent);font-family:Georgia,serif}
+  .shophead .stats div span{display:block;font-size:12px;color:var(--ink-2)}
+  .actrow{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+  .btn{font-size:13px;padding:6px 16px;border-radius:99px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--accent)}
+
+  /* 橱窗 */
+  .window{background:var(--paper-2);border:1px dashed var(--amber);border-radius:12px;padding:16px 18px;margin-bottom:24px;font-size:13px}
+  .window .t{font-weight:700;color:var(--amber);letter-spacing:1px}
+  .window .voteline{margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .window .voteline button{font-size:12px;padding:3px 12px;border-radius:99px;border:1px solid var(--amber);background:#fff;cursor:pointer}
+
+  h2{font-size:20px;margin:28px 0 12px;letter-spacing:1px}
+  h2 .no{color:var(--accent);font-family:Georgia,serif;margin-right:8px}
+  h2 small{font-size:12px;color:var(--ink-2);font-weight:400;margin-left:10px}
+
+  /* 作品 + 诞生档案 */
+  .work{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 28px;margin-bottom:18px}
+  .work h3{font-size:20px}
+  .work .wmeta{font-size:12px;color:var(--ink-2);margin:4px 0 12px}
+  .work p{font-size:14px;margin-bottom:10px}
+  .credits{background:var(--paper-2);border-radius:8px;padding:10px 14px;font-size:13px;margin:12px 0}
+  .credits b{color:var(--accent)}
+  .arch{border:1px solid var(--line);border-radius:8px;margin:12px 0;overflow:hidden}
+  .arch .ah{background:var(--paper-2);padding:8px 14px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .arch .ah span{font-weight:400;font-size:11px;color:var(--ink-2)}
+  .arch .ab{padding:12px 14px;font-size:12.5px}
+  .arch .row{display:flex;gap:10px;margin-bottom:8px}
+  .arch .row .k{min-width:86px;color:var(--ink-2)}
+  .arch .row .v b{color:var(--ink)}
+  .lock{color:var(--ink-2);font-size:11px}
+  .fix{background:#FBEFE9;border:1px solid #E8C4B4;border-radius:6px;padding:8px 12px;font-size:12.5px;margin:8px 0}
+  .fix .tag{background:var(--red);color:#fff;font-size:11px;padding:0 6px;border-radius:4px;margin-right:6px}
+
+  /* 捉虫入口 */
+  .catchbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-size:13px}
+  .catchbox .types{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+  .catchbox .types span{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:2px 12px;background:#fff}
+  .catchbox .types span.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* 贡献者墙 */
+  .wall{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .wcol{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .wcol h4{font-size:14px;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .wrow{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0}
+  .wrow .n{color:var(--ink)} .wrow .c{color:var(--accent);font-family:Georgia,serif}
+  .gold{color:var(--amber)}
+  .note{font-size:12px;color:var(--ink-2);margin-top:10px}
+
+  footer{border-top:1px solid var(--line);margin-top:36px;padding:20px 24px;color:var(--ink-2);font-size:12px;text-align:center}
+  @media(max-width:800px){.wall{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b class="serif">造物 · Atelier</b>
+  <a href="workbench.html">工作台</a>
+  <a href="shop.html" style="color:#fff;font-weight:700">小铺</a>
+  <a href="vault.html">资产库</a>
+  <a href="../index.html">返回总览</a>
+  <div class="sp"></div>
+  <span class="proto-note">原型 · 静态演示 · 数据为示例</span>
+</div>
+
+<div class="wrap">
+
+  <!-- 铺头 -->
+  <div class="shophead">
+    <h1 class="serif">老周的小铺</h1>
+    <p class="intro">职场观察 · 非虚构 · 不定期更新 ｜ 这间铺子的每篇文章，都有读者参与创作——报料、首读、捉虫，都被记在案。</p>
+    <div class="stats">
+      <div><b>23</b><span>已发布作品</span></div>
+      <div><b>41</b><span>读者报料（18 已采用）</span></div>
+      <div><b>12</b><span>注册首读者</span></div>
+      <div><b>9</b><span>确认捉虫 → 自检规则</span></div>
+    </div>
+    <div class="actrow">
+      <button class="btn">📮 我有故事/线索（报料）</button>
+      <button class="btn ghost">申请成为首读者</button>
+      <button class="btn ghost">我的贡献页</button>
+    </div>
+  </div>
+
+  <!-- 工坊橱窗 -->
+  <div class="window">
+    <span class="t">🪟 工坊橱窗 · 在制公示</span>（创作者选择公开）
+    <div style="margin-top:8px">下一篇方向：<b>《大厂人的手艺退路》</b> · 当前阶段：起草中 ｜ 缘起于 @小鹿 的报料与 3 条"想看转行"的留言。</div>
+    <div class="voteline">
+      <button>👀 追更（发布时提醒我）· 已有 47 人</button>
+      <button>🗳 投一票想看 · 23 票</button>
+      <button>📮 这个选题我有料</button>
+      <span style="color:var(--ink-2);font-size:12px">投票与报料会作为需求信号入库，是否写由老周决定</span>
+    </div>
+  </div>
+
+  <!-- 作品陈列 + 诞生档案 -->
+  <h2 class="serif"><span class="no">①</span>作品陈列<small>每篇附"诞生档案"：从创作档案自动生成的公开摘要，带锚点、不可编造（§6.5）</small></h2>
+  <div class="work">
+    <h3>转行记：从大厂到手艺人</h3>
+    <div class="wmeta">发布于 2026-07-28 · 阅读 12,400 · 创作方式：老周撰写，AI 参与结构建议与 1 处背景段（已转正）</div>
+    <p>去年秋天，我第一次见到小鹿的木工坊时，很难把眼前这个系着围裙、手上沾着木屑的人，和三年前那个在互联网大厂做增长的人对上号……</p>
+
+    <div class="credits">✍️ <b>本篇共创</b>：素材由 <b>@小鹿</b> 报料（具名引用）；<b>@阿树、@石头、@阿澈</b> 等 5 位首读者参与内测；<b>@石头</b> 指正 1 处数据。</div>
+
+    <div class="arch">
+      <div class="ah">📜 诞生档案 <span>来自创作档案 WA-096 的公开字段 · 创作者已勾选公开 · 授权范围：具名引用</span></div>
+      <div class="ab">
+        <div class="row"><div class="k">选题源起</div><div class="v"><b>@小鹿 报料</b>（MC-0417）+ 3 条需求信号聚类"想看转行"+ 搁置 9 个月的《手艺经济》伏笔</div></div>
+        <div class="row"><div class="k">流水线</div><div class="v">选题 → 起草（骨架）→ 自检（采纳 2 / 驳回 1）→ 内测（5 位首读者，强信号 1 处：P4"太说教"，已改）→ 定稿发布，用时 9 天</div></div>
+        <div class="row"><div class="k">内测强信号</div><div class="v">4/5 位首读者标注 P4"读不下去 · 太说教" → 已重写（修订对照可在版本档案查看）</div></div>
+        <div class="row"><div class="k">AI 参与</div><div class="v">结构建议 + 1 处背景段（起草时色标，定稿前转正）</div></div>
+        <div class="row"><div class="k">未公开字段</div><div class="v lock">自检驳回理由、读者原始报料全文、复盘数据 —— 按授权与创作者意愿不展示</div></div>
+      </div>
+    </div>
+
+    <div class="fix"><span class="tag">修订</span>2026-08-04 经 @石头 指正：第 6 段引用的"手艺人年均收入"数据已过时，已更新为 2026 口径并补充来源。<b>该纠错已写入自检规则库，未来所有涉及该领域数据的稿件将自动核对时效。</b></div>
+
+    <div class="catchbox">
+      <b>🐛 发现错误？捉虫入口</b> —— 选中原文提交，创作者裁决；确认的捉虫会永久提高这间铺子的质量下限。
+      <div class="types"><span class="on">事实错误</span><span>数据过时</span><span>引用有误</span><span>错别字</span></div>
+      <div style="color:var(--ink-2);font-size:12px">需附证据（链接/说明）。历史捉虫 9 起：确认 6 · 驳回 2 · 部分确认 1。</div>
+    </div>
+  </div>
+
+  <div class="work">
+    <h3>被算法喂大的孩子</h3>
+    <div class="wmeta">发布于 2026-07-10 · 阅读 30,800 · 诞生档案已公开</div>
+    <p>我们这一代家长，是第一批把孩子交给推荐算法共同抚养的人……</p>
+    <div class="credits">✍️ <b>本篇共创</b>：素材由 <b>@麦子、@青梧</b> 报料（匿名化处理）；4 位首读者参与内测。</div>
+  </div>
+
+  <!-- 贡献者墙 -->
+  <h2 class="serif"><span class="no">②</span>贡献者墙<small>排名货币是"被采用的贡献"，不是活跃度；每条记录带资产引用锚点，可溯源到具体文章</small></h2>
+  <div class="wall">
+    <div class="wcol">
+      <h4>📮 报料上榜</h4>
+      <div class="wrow"><span class="n">@小鹿 <span class="gold">★</span></span><span class="c">采用 3 次</span></div>
+      <div class="wrow"><span class="n">@麦子</span><span class="c">采用 2 次</span></div>
+      <div class="wrow"><span class="n">@青梧</span><span class="c">采用 1 次</span></div>
+    </div>
+    <div class="wcol">
+      <h4>🥇 金牌首读</h4>
+      <div class="wrow"><span class="n">@阿树 <span class="gold">★</span></span><span class="c">质量分 47</span></div>
+      <div class="wrow"><span class="n">@阿澈</span><span class="c">质量分 38</span></div>
+      <div class="wrow"><span class="n">@石头</span><span class="c">质量分 29</span></div>
+    </div>
+    <div class="wcol">
+      <h4>🐛 捉虫达人</h4>
+      <div class="wrow"><span class="n">@石头 <span class="gold">★</span></span><span class="c">确认 4 次</span></div>
+      <div class="wrow"><span class="n">@白桦</span><span class="c">确认 2 次</span></div>
+    </div>
+  </div>
+  <p class="note">★ 金牌标识 ｜ 墙上所有记录可点击溯源至具体文章（授权允许范围内）。每位读者还有自己的「贡献页」：我的报料及状态（等待匹配 / 已被采用）、首读记录、获得的署名合集——可生成分享卡："我的故事被写进了《转行记》"。</p>
+
+</div>
+
+<footer>造物 · Atelier 原型 · 小铺（读者端）｜ 本页演示 §6 读者参与体系与 §6.5 小铺呈现 ｜ 静态演示，非可运行系统</footer>
+</body>
+</html>
