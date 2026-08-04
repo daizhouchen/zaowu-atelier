@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>造物 · Atelier — 产品 Demo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="topbar">
+  <b class="serif">造物 · Atelier</b>
+  <span class="mode" id="mode-badge">连接中…</span>
+  <div class="sp"></div>
+  <a class="nav on" data-view="workbench" href="#workbench" onclick="location.hash='workbench';return false">工作台</a>
+  <a class="nav" data-view="shop" href="#shop" onclick="location.hash='shop';return false">小铺</a>
+  <a class="nav" data-view="vault" href="#vault" onclick="location.hash='vault';return false">资产库</a>
+  <a class="nav ext" href="../index.html">总览页</a>
+  <button class="reset-btn" id="btn-reset" title="重置为种子数据">↺ 重置 demo</button>
+</div>
+
+<main id="view"></main>
+
+<footer>
+  造物 · Atelier 产品 demo ｜ 引擎：<code>shared/engine.js</code>（浏览器与 Node 后端共用同一份编排逻辑）｜ 实现范围：PRD §10.1 MVP ｜ 三铁律：无引用不调用 · AI 有提议权没有决定权 · 一切留痕一切沉淀
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="../shared/engine.js"></script>
+<script src="../shared/seed.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
