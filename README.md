@@ -1,5 +1,7 @@
 # 造物 · Atelier
 
+> **线上体验：https://daizhouchen.github.io/zaowu-atelier/**（GitHub Pages 静态托管，自动降级为浏览器内引擎，完整循环可跑通）
+
 > 创作者经营创作的工坊：AI 总管对内把内容质量做成**流水线机制**，对外把读者请进**创作流程**，底层把每一次创作沉淀为**可编排的资产**。
 
 产品设计作品（PRD + 前后端完整 Demo）。产品要回答三个问题：
@@ -57,6 +59,8 @@ npm start        # → http://localhost:8787 （后端 + 前端一起托管）
 ```
 
 前端探活 `/api/health`：连得上走 Express + data.json 持久化；连不上自动降级为浏览器内引擎（同一份 `shared/engine.js` + localStorage），所以 GitHub Pages 静态托管也能体验完整循环。页面右上角徽标显示当前模式。
+
+引擎回归测试：`node server/smoke-test.js`（20 项断言覆盖全循环：报料→触发→装配拦截→起草→自检→定稿拦截→发布→捉虫→衍生规则复利）。
 
 ## 推荐体验路径（5 分钟跑通复利飞轮）
 
