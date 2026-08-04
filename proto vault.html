@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资产库与编排视图 · 造物原型</title>
+<style>
+  :root{
+    --paper:#F6F1E7; --paper-2:#EFE7D8; --ink:#22201B; --ink-2:#5C5648;
+    --accent:#B4552D; --line:#D8CDB8; --green:#3E7A4E; --amber:#B98A2F;
+    --red:#B04A3C; --blue:#3E6B8A; --card:#FFFDF7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.7}
+  .serif{font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+  .topbar{background:var(--ink);color:#EDE6D6;padding:10px 24px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:9}
+  .topbar b{font-size:16px;letter-spacing:1px}
+  .topbar a{color:#CFC5AE;text-decoration:none;font-size:13px}
+  .topbar a:hover{color:#fff}
+  .topbar .sp{flex:1}
+  .proto-note{font-size:11px;color:#9A917C;border:1px solid #4A4536;padding:1px 8px;border-radius:99px}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 24px}
+  h2{font-size:20px;margin:28px 0 12px;letter-spacing:1px}
+  h2 .no{color:var(--accent);font-family:Georgia,serif;margin-right:8px}
+  h2 small{font-size:12px;color:var(--ink-2);font-weight:400;margin-left:10px}
+  .flywheel{background:var(--ink);color:#EDE6D6;border-radius:12px;padding:22px 26px;margin-bottom:8px;font-size:14px}
+  .flywheel .arrows{font-family:Georgia,serif;color:var(--accent);font-size:17px;margin:10px 0;letter-spacing:1px}
+  .flywheel .note{color:#CFC5AE;font-size:12.5px}
+  .vaults{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .vault{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .vault .vh{padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid var(--line)}
+  .vault.c1 .vh{background:#F3E4DC;color:var(--accent)}
+  .vault.c2 .vh{background:#E7EDF2;color:var(--blue)}
+  .vault.c3 .vh{background:#E9EFE9;color:var(--green)}
+  .assetrow{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;font-size:12.5px;border-bottom:1px dashed var(--line)}
+  .assetrow:last-child{border-bottom:none}
+  .assetrow .nm{font-weight:600}
+  .assetrow .ct{font-size:11px;color:var(--ink-2);font-family:Georgia,serif}
+  .assetrow .ver{font-size:10px;padding:0 6px;border-radius:4px;background:var(--paper-2);color:var(--ink-2)}
+  .assetrow .ver.m{background:#E3EEE5;color:var(--green)}
+  .assetrow .ver.v2{background:#F3E9D2;color:var(--amber)}
+  .assetrow .ver.v3{background:#E3E8EE;color:var(--blue)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card)}
+  th,td{padding:7px 10px;border:1px solid var(--line);text-align:center}
+  th{background:var(--paper-2);font-size:12px}
+  td.l{text-align:left;font-weight:600}
+  .m{color:var(--accent);font-weight:700}
+  .o{color:var(--ink-2)}
+  .dash{color:#C9BFA8}
+  .mnote{font-size:12px;color:var(--ink-2);margin-top:8px}
+  .mnote b{color:var(--red)}
+  .mcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-size:13px;max-width:760px}
+  .mcard .row{display:flex;gap:10px;margin-bottom:6px}
+  .mcard .k{min-width:84px;color:var(--ink-2);font-size:12px}
+  .mcard .lic-ok{color:var(--green);font-weight:700}
+  .mcard .flowline{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;font-size:12px;color:var(--ink-2)}
+  .log{background:#23211C;color:#D9D0BC;border-radius:10px;padding:16px 18px;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:1.9;overflow-x:auto}
+  .log .t{color:#8F866F}
+  .log .trig{color:#E2A35B;font-weight:700}
+  .log .asm{color:#8FBF7F;font-weight:700}
+  .log .prop{color:#E08A6E;font-weight:700}
+  .log .wb{color:#9FB6C9;font-weight:700}
+  .log .ok{color:#8FBF7F} .log .fail{color:#E07A5F}
+  .contract{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:13px;margin-top:12px}
+  .contract b{color:var(--accent)}
+  footer{border-top:1px solid var(--line);margin-top:36px;padding:20px 24px;color:var(--ink-2);font-size:12px;text-align:center}
+  @media(max-width:900px){.vaults{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b class="serif">造物 · Atelier</b>
+  <a href="workbench.html">工作台</a>
+  <a href="shop.html">小铺</a>
+  <a href="vault.html" style="color:#fff;font-weight:700">资产库</a>
+  <a href="../index.html">返回总览</a>
+  <div class="sp"></div>
+  <span class="proto-note">原型 · 静态演示 · 数据为示例</span>
+</div>
+
+<div class="wrap">
+  <div class="flywheel">
+    <b>复利飞轮</b>：一次循环跑完，资产库比循环开始时更厚。资产越厚，下一次循环的选题命中率、起草质量、自检精度越高。
+    <div class="arrows">①选题提议 ←（T1 新报料 / T2 信号聚类 / T3 伏笔到期 / T4 搁置复活）← 资产事件</div>
+    <div class="note">②装配（优先级 1/2/4 + 授权硬门槛）→ ③起草 → ④自检（规则库注入 + 驳回负样本）→ ⑤定稿发布（署名核验）→ ⑥复盘 → <b>写回资产库 → 回到 ①</b></div>
+  </div>
+
+  <h2 class="serif"><span class="no">①</span>三资产库<small>创作者 10 类 + 读者 6 类 + 创作档案；字段级定义见 PRD §7.1</small></h2>
+  <div class="vaults">
+    <div class="vault c1">
+      <div class="vh">🗄 创作者资产库 Creator Vault</div>
+      <div class="assetrow"><span class="nm">风格档案 StyleProfile</span><span class="ver m">MVP</span></div>
+      <div class="assetrow"><span class="nm">观点索引 StanceIndex</span><span class="ver v3">v0.3</span></div>
+      <div class="assetrow"><span class="nm">知识库 KnowledgeBase</span><span class="ct">42 条</span></div>
+      <div class="assetrow"><span class="nm">素材库 MaterialBank</span><span class="ct">18 条</span></div>
+      <div class="assetrow"><span class="nm">速记收集箱 NoteInbox</span><span class="ct">6 条待归档</span></div>
+      <div class="assetrow"><span class="nm">引用源库 CitationBank</span><span class="ver v2">v0.2</span></div>
+      <div class="assetrow"><span class="nm">术语与人物卡 EntityCard</span><span class="ver v3">v0.3</span></div>
+      <div class="assetrow"><span class="nm">未完成选题库 TopicBacklog</span><span class="ct">7 个</span></div>
+      <div class="assetrow"><span class="nm">自检规则库 CheckRuleBank</span><span class="ct">9 条 · 命中 31 次</span></div>
+      <div class="assetrow"><span class="nm">标题实验记录 TitleLog</span><span class="ver v2">v0.2</span></div>
+    </div>
+    <div class="vault c2">
+      <div class="vh">👥 读者资产库 Reader Vault</div>
+      <div class="assetrow"><span class="nm">素材卡 MaterialCard</span><span class="ct">41 张 · 18 已采用</span></div>
+      <div class="assetrow"><span class="nm">需求信号 DemandSignal</span><span class="ct">156 条 · 9 个聚类</span></div>
+      <div class="assetrow"><span class="nm">反馈记录 FeedbackRecord</span><span class="ver v2">v0.2</span></div>
+      <div class="assetrow"><span class="nm">捉虫记录 BugReport</span><span class="ct">9 起 · 确认 6</span></div>
+      <div class="assetrow"><span class="nm">授权请求 LicenseRequest</span><span class="ver v2">v0.2</span></div>
+      <div class="assetrow"><span class="nm">读者画像 ReaderProfile</span><span class="ct">87 人</span></div>
+    </div>
+    <div class="vault c3">
+      <div class="vh">📜 创作档案 Work Archive</div>
+      <div class="assetrow"><span class="nm">WA-096 转行记</span><span class="ct">已归档 · 不可变</span></div>
+      <div class="assetrow"><span class="nm">WA-095 一个人公司的第300天</span><span class="ct">内测中</span></div>
+      <div class="assetrow"><span class="nm">WA-094 被算法喂大的孩子</span><span class="ct">已归档</span></div>
+      <div class="assetrow"><span class="nm">WA-083 手艺经济</span><span class="ct">搁置 · 伏笔 2 条</span></div>
+      <div class="assetrow" style="color:var(--ink-2);font-size:11.5px"><span>每篇含：选题源起 / 装配清单 / 自检全量 / 修订归因 / AI 参与底账 / 署名核验 / 复盘快照 / 伏笔种子</span></div>
+    </div>
+  </div>
+
+  <h2 class="serif"><span class="no">②</span>资产利用矩阵<small>每类资产至少要有两个消费方，否则不引入——囤而不用的"资产"是负债（§7.2）</small></h2>
+  <table>
+    <tr><th style="text-align:left">资产</th><th>选题</th><th>起草装配</th><th>自检</th><th>发布/小铺</th><th>复盘/案头</th></tr>
+    <tr><td class="l">风格档案</td><td class="dash">—</td><td class="m">●必装</td><td class="m">●C4基准</td><td class="dash">—</td><td class="dash">—</td></tr>
+    <tr><td class="l">素材卡</td><td class="m">●T1/T4触发</td><td class="m">●优先级2</td><td class="m">●C5授权核验</td><td class="m">●署名核验</td><td class="o">○消耗清点</td></tr>
+    <tr><td class="l">需求信号</td><td class="m">●T2触发</td><td class="m">●优先级4</td><td class="dash">—</td><td class="o">○标题依据</td><td class="m">●下篇信号</td></tr>
+    <tr><td class="l">未完成选题库</td><td class="m">●T3/T4触发</td><td class="dash">—</td><td class="dash">—</td><td class="o">○候选公示</td><td class="m">●复活卡片</td></tr>
+    <tr><td class="l">自检规则库</td><td class="dash">—</td><td class="dash">—</td><td class="m">●注入+降权</td><td class="dash">—</td><td class="o">○拦截统计</td></tr>
+    <tr><td class="l">捉虫记录</td><td class="dash">—</td><td class="dash">—</td><td class="m">●衍生规则</td><td class="m">●修订痕迹</td><td class="o">○跳阶段归因</td></tr>
+    <tr><td class="l">创作档案</td><td class="m">●T3伏笔</td><td class="m">●优先级3</td><td class="o">○C3出处</td><td class="m">●诞生档案页</td><td class="m">●数据底座</td></tr>
+  </table>
+  <p class="mnote">● 主消费方 ｜ ○ 次消费方 ｜ <b>准入规则：新增资产提案先填进这张矩阵，填不满两个 ●/○ 提案不成立。</b></p>
+
+  <h2 class="serif"><span class="no">③</span>资产样例：一张素材卡的一生<small>从读者报料到被写进文章，全程留痕（真实 demo 中可在资产库页查看）</small></h2>
+  <div class="mcard">
+    <div class="row"><div class="k">素材卡</div><div><b>MC-0417 · 小鹿的转行经历</b></div></div>
+    <div class="row"><div class="k">结构化要素</div><div>时间：2025-09 ｜ 人物：互联网增长 → 木工坊主理人 ｜ 冲突点：收入降四成 vs "每一块钱看得见来路" ｜ 可验证细节：工作室地址、转型时间线</div></div>
+    <div class="row"><div class="k">授权 license</div><div class="lic-ok">具名引用 · status: in_use ｜ 可撤回，撤回后引擎立即停配；已发布不追溯</div></div>
+    <div class="row"><div class="k">提供者</div><div>@小鹿（质量分 12 · 报料 3 次全部被采用）</div></div>
+    <div class="flowline">流转记录：2026-07-12 报料入库（T1）→ 07-13 匹配 3 条需求信号生成选题提议 → 07-15 装配进《大厂人的手艺退路》→ 07-20 拖入正文登记锚点 A-3/A-7 → 07-24 署名核验通过 → 07-28 发布，文末署名"本篇素材由 @小鹿 报料" → 通知已送达小鹿。</div>
+  </div>
+
+  <h2 class="serif"><span class="no">④</span>编排日志<small>引擎每次触发/装配/提议/写回都记一条；校验失败的产出丢弃也记录——引擎做过什么、凭什么做，全程可审计</small></h2>
+  <div class="log">
+    <div><span class="t">08-05 09:12</span> <span class="trig">[Trigger T1]</span> 新报料入库 MC-0417（小鹿 · 具名引用）→ 匹配需求信号聚类 CL-09（转行×3）、搁置选题 WA-083 伏笔</div>
+    <div><span class="t">08-05 09:12</span> <span class="prop">[Propose]</span> 生成选题提议 TP-031《大厂人的手艺退路》· evidence_refs=4 · <span class="ok">Contract 校验通过</span>（锚点存在 ✓ 授权 ✓ 配额 ✓）</div>
+    <div><span class="t">08-05 09:31</span> <span class="prop">[Propose]</span> 候选提议 X-077 丢弃 · 原因：evidence_refs=0，违反铁律①"无引用不调用" · <span class="fail">Contract 校验失败</span></div>
+    <div><span class="t">08-05 10:02</span> <span class="asm">[Assemble]</span> 装配《大厂人的手艺退路》上下文包：7 项 · MC-0392 拦截（未授权）→ 已建议发起授权请求</div>
+    <div><span class="t">08-05 10:44</span> <span class="asm">[Assemble]</span> 自检触发：C1×1 / C2×1 / C4×1 · 全部带锚点 · 规则库注入 9 条（含捉虫衍生规则 CR-05）</div>
+    <div><span class="t">08-04 16:20</span> <span class="wb">[Writeback]</span> 捉虫 BG-009 确认 → 写入自检规则库 CR-09"涉及手艺人收入数据须核对时效" → 命中目标：未来所有涉该领域稿件</div>
+    <div><span class="t">08-04 16:20</span> <span class="wb">[Writeback]</span> 修订痕迹写入《转行记》原位 · 贡献者墙 +1（@石头）</div>
+  </div>
+  <div class="contract">
+    <b>引擎校验层（Contract）三校验</b>：① 锚点存在性（引用的 asset_id / 段落真实存在）② 授权校验（装配清单不含未授权素材）③ 配额校验（提议 ≤3 条/日、token 预算）。校验失败 → 丢弃 + 记日志，<b>不降级呈现</b>。
+  </div>
+
+</div>
+<footer>造物 · Atelier 原型 · 资产库与编排视图 ｜ 本页演示 PRD §7 资产系统与编排引擎 ｜ 静态演示，非可运行系统</footer>
+</body>
+</html>
