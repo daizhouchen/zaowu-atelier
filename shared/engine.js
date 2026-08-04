@@ -57,7 +57,7 @@
       if (w.status === 'self_check' && w.checks.some(function (c) { return c.action === null; }))
         cards.push({ type: '待处理自检', title: w.title, ref: '未处理 ' + w.checks.filter(function (c) { return c.action === null; }).length + ' 条 · 处理完毕才可定稿', wid: w.id });
       if (w.status === 'published')
-        cards.push({ type: '复盘到期', title: w.title, ref: '发布满 7 天提醒（demo 中可直接复盘归档）', wid: w.id });
+        cards.push({ type: '复盘到期', title: w.title, ref: '发布满 7 天提醒 · 资产清点 + 档案归档（不可变）', wid: w.id });
     });
     s.bugReports.filter(function (b) { return b.status === 'open'; }).forEach(function (b) {
       cards.push({ type: '捉虫待裁决', title: '@' + b.reader + ' · ' + b.type, ref: '附证据 · 确认后写入自检规则库', bid: b.id });
@@ -270,9 +270,43 @@
   Atelier.prototype.addParagraph = function (wid, text, kind) {
     var w = this._work(wid);
     if (['drafting', 'self_check'].indexOf(w.status) < 0) throw new Error('当前状态不可编辑：' + w.status);
-    var p = { id: 'P' + (w.paragraphs.length + 1), text: text, kind: kind || 'user', citations: [] };
+    var maxN = 0;
+    w.paragraphs.forEach(function (x) { var n = parseInt(String(x.id).slice(1), 10); if (!isNaN(n) && n > maxN) maxN = n; });
+    var p = { id: 'P' + (maxN + 1), text: text, kind: kind || 'user', citations: [] };
     w.paragraphs.push(p);
     return p;
+  };
+
+  Atelier.prototype.updateParagraph = function (wid, pid, text) {
+    var w = this._work(wid);
+    if (['drafting', 'self_check'].indexOf(w.status) < 0) throw new Error('当前状态不可编辑：' + w.status);
+    var p = w.paragraphs.find(function (x) { return x.id === pid; });
+    if (!p) throw new Error('段落不存在');
+    if (!String(text).trim()) throw new Error('段落不能为空');
+    p.text = String(text).trim();
+    if (p.kind === 'ai' && p.confirmed) { /* 铁律②：AI 段被改动后须重新过目 */
+      p.confirmed = false; p.kind = 'ai';
+      this.log('Writeback', w.id + ' · 段落 ' + pid + ' 被修改，AI 段转正状态已回退（须重新过目）', true);
+    }
+    return p;
+  };
+
+  Atelier.prototype.deleteParagraph = function (wid, pid) {
+    var w = this._work(wid);
+    if (['drafting', 'self_check'].indexOf(w.status) < 0) throw new Error('当前状态不可编辑：' + w.status);
+    var idx = w.paragraphs.findIndex(function (x) { return x.id === pid; });
+    if (idx < 0) throw new Error('段落不存在');
+    var removed = w.paragraphs.splice(idx, 1)[0];
+    this.log('Writeback', w.id + ' · 删除段落 ' + pid + '（' + removed.text.slice(0, 20) + '…）', true);
+    return removed;
+  };
+
+  Atelier.prototype.renameWork = function (wid, title) {
+    var w = this._work(wid);
+    if (['archived'].indexOf(w.status) >= 0) throw new Error('已归档作品不可改名');
+    if (!String(title).trim()) throw new Error('标题不能为空');
+    w.title = String(title).trim();
+    return w;
   };
 
   Atelier.prototype.citeAsset = function (wid, pid, assetRef) {
