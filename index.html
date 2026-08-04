@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>造物 · Atelier — 创作者经营创作的工坊</title>
+<style>
+  :root{
+    --paper:#F6F1E7; --paper-2:#EFE7D8; --ink:#22201B; --ink-2:#5C5648;
+    --accent:#B4552D; --accent-2:#8A3F1F; --line:#D8CDB8; --green:#3E7A4E;
+    --amber:#B98A2F; --red:#B04A3C; --card:#FFFDF7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .serif{font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+  .tag{display:inline-block;border:1px solid var(--accent);color:var(--accent);font-size:12px;padding:2px 10px;border-radius:99px;letter-spacing:2px}
+  h1{font-size:44px;margin:18px 0 10px;letter-spacing:2px}
+  .sub{color:var(--ink-2);font-size:17px;max-width:720px}
+  .sub b{color:var(--ink)}
+
+  section{padding:48px 0}
+  h2{font-size:24px;margin-bottom:20px;letter-spacing:1px}
+  h2 .no{color:var(--accent);margin-right:10px;font-family:Georgia,serif}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+  .card h3{font-size:17px;margin-bottom:8px}
+  .card p{font-size:14px;color:var(--ink-2)}
+  .card .k{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:1px;display:block;margin-bottom:6px}
+
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:8px 0}
+  .stage{flex:1;min-width:110px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 10px;text-align:center;margin:6px;position:relative}
+  .stage b{display:block;font-size:15px}
+  .stage span{font-size:12px;color:var(--ink-2)}
+  .stage .st{display:inline-block;font-size:11px;border-radius:4px;padding:1px 6px;margin-top:6px;background:var(--paper-2);color:var(--ink-2)}
+
+  .loop{background:var(--ink);color:#EDE6D6;border-radius:12px;padding:28px 26px;margin-top:10px}
+  .loop p{font-size:14.5px;color:#CFC5AE;max-width:860px}
+  .loop p b{color:#EDE6D6}
+  .loop .arrows{font-family:Georgia,serif;color:var(--accent);font-size:18px;letter-spacing:1px;margin:14px 0 10px}
+
+  .proto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .proto{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s}
+  .proto:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(90,70,40,.14)}
+  .proto .shot{height:150px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:46px;background:var(--paper-2)}
+  .proto .body{padding:16px 18px}
+  .proto .body b{font-size:16px;display:block}
+  .proto .body span{font-size:13px;color:var(--ink-2)}
+  .proto .go{color:var(--accent);font-size:13px;margin-top:8px;display:block}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border-radius:10px;overflow:hidden}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+  th{background:var(--paper-2);font-size:13px;letter-spacing:1px}
+  .mvp{color:var(--green);font-weight:700}
+  .later{color:var(--ink-2)}
+
+  .metrics{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
+  .metric{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 20px;flex:1;min-width:200px}
+  .metric b{font-size:26px;color:var(--accent);display:block;font-family:Georgia,serif}
+  .metric span{font-size:13px;color:var(--ink-2)}
+
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--ink-2);font-size:13px;text-align:center}
+  .demo-btn{display:inline-block;margin-top:22px;background:var(--accent);color:#fff;text-decoration:none;font-size:16px;padding:12px 30px;border-radius:10px;letter-spacing:1px}
+  .demo-btn:hover{background:var(--accent-2)}
+  .demo-btn small{display:block;font-size:12px;opacity:.85;font-weight:400}
+  .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;margin-left:6px}
+  .pill.g{background:#E3EEE5;color:var(--green)}
+  .pill.a{background:#F3E9D2;color:var(--amber)}
+  .pill.r{background:#F2E0DC;color:var(--red)}
+  @media(max-width:760px){.grid3,.proto-grid{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="tag">PORTFOLIO · PRODUCT DESIGN</span>
+    <h1 class="serif">造物 · Atelier</h1>
+    <p class="sub">创作者经营创作的工坊：AI 总管对内把内容质量做成<b>流水线机制</b>，对外把读者请进<b>创作流程</b>，底层把每一次创作沉淀为<b>可编排的资产</b>。</p>
+    <a class="demo-btn" href="app/index.html">🔨 进入可交互产品 Demo<small>前后端完整实现 · PRD §10.1 MVP 全循环可跑通</small></a>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2 class="serif"><span class="no">01</span>产品要回答的三个问题</h2>
+    <div class="grid3">
+      <div class="card"><span class="k">问题一 · 质量怎么来</span><h3>质量靠机制生产</h3><p>选题→起草→自检→内测→定稿→发布→复盘。自检逐段挑错，每条带原文引用；内测让首读者预读标出"读不下去/不相信"的位置。不靠灵感，靠流水线。</p></div>
+      <div class="card"><span class="k">问题二 · 读者怎么进来</span><h3>读者是共创者</h3><p>报料人提交素材与授权、首读者内测预读、捉虫人纠错补证。署名致谢、贡献者墙、个人贡献页——参与被郑重对待。</p></div>
+      <div class="card"><span class="k">问题三 · 经验怎么复利</span><h3>一切沉淀成资产</h3><p>三个资产库 + 编排引擎。每次创作自动组装风格档案、已授权素材、需求信号；捉虫确认即变成下一篇的自检规则。</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="serif"><span class="no">02</span>创作流水线（作品状态机的可视化）</h2>
+    <div class="flow">
+      <div class="stage"><b>选题</b><span>4 触发器提议<br>evidence_refs ≥1</span><span class="st">idea</span></div>
+      <div class="stage"><b>起草</b><span>6 级资产装配<br>三模式+色标转正</span><span class="st">drafting</span></div>
+      <div class="stage"><b>自检</b><span>C1–C5 五类检查<br>锚点+置信度</span><span class="st">self_check</span></div>
+      <div class="stage"><b>内测</b><span>首读者结构化标注<br>共识 ≥60% 强信号</span><span class="st">beta</span></div>
+      <div class="stage"><b>定稿发布</b><span>署名核验<br>诚实标注声明</span><span class="st">finalized</span></div>
+      <div class="stage"><b>复盘</b><span>归因+资产清点<br>下篇信号</span><span class="st">retro</span></div>
+    </div>
+    <div class="loop">
+      <div class="arrows">读者报料 / 需求信号 / 伏笔 → 选题提议 → 创作 → 资产写回 → 下一次创作更准 → ↺</div>
+      <p><b>复利飞轮</b>：一次循环跑完，资产库比循环开始时更厚；资产越厚，下一次循环的选题命中率、起草质量、自检精度越高。被否决的提议、被驳回的自检意见同样写回资产库——一切留痕，一切沉淀。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="serif"><span class="no">03</span>设计原型三屏（静态）与产品 Demo</h2>
+    <div class="proto-grid">
+      <a class="proto" href="app/index.html">
+        <div class="shot">🔨</div>
+        <div class="body"><b>可交互产品 Demo（推荐）</b><span>前后端完整实现：流水线/报料/捉虫/资产编排全部可操作</span><span class="go">进入 Demo →</span></div>
+      </a>
+      <a class="proto" href="proto/workbench.html">
+        <div class="shot">🖥️</div>
+        <div class="body"><b>创作者工作台</b><span>今日案头 · 流水线看板 · 编辑器+资产抽屉 · 自检报告</span><span class="go">进入原型 →</span></div>
+      </a>
+      <a class="proto" href="proto/shop.html">
+        <div class="shot">🏮</div>
+        <div class="body"><b>小铺（读者端）</b><span>作品陈列 · 诞生档案 · 报料/首读/捉虫 · 贡献者墙</span><span class="go">进入原型 →</span></div>
+      </a>
+      <a class="proto" href="proto/vault.html">
+        <div class="shot">🗂️</div>
+        <div class="body"><b>资产库与编排视图</b><span>三库数据模型 · 资产利用矩阵 · 编排日志</span><span class="go">进入原型 →</span></div>
+      </a>
+    </div>
+    <p style="font-size:13px;color:var(--ink-2);margin-top:10px">注：上方后两屏为静态设计原型；小铺（读者端）原型见 <a href="proto/shop.html">proto/shop.html</a>。可交互版本请进产品 Demo。</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="serif"><span class="no">04</span>关键机制一览（节选自 PRD）</h2>
+    <table>
+      <tr><th style="width:200px">机制</th><th>规则摘要</th><th style="width:90px">版本</th></tr>
+      <tr><td>无引用不调用</td><td>引擎任何产出必须带资产引用锚点，系统级 Contract 校验，无锚点直接丢弃</td><td class="mvp">MVP</td></tr>
+      <tr><td>起草资产装配</td><td>6 级优先级：风格档案必装；未授权素材即使语义相关也不装配（硬规则）</td><td class="mvp">MVP</td></tr>
+      <tr><td>自检 CheckItem</td><td>锚点原文引用 + 置信度分级 + 证据资产；驳回理由写回规则库做误报降权</td><td class="mvp">MVP</td></tr>
+      <tr><td>诚实标注</td><td>AI 段落色标、定稿前逐段"过目转正"；创作方式声明自动生成、不可删</td><td class="mvp">MVP</td></tr>
+      <tr><td>素材授权三档</td><td>具名引用 / 匿名化 / 仅背景参考；可撤回，撤回后引擎立即停配</td><td class="mvp">MVP</td></tr>
+      <tr><td>首读者质量分</td><td>采纳 +3 / 极有价值 +5 / 未反馈 −2；连续 2 次缺席移出资格池</td><td class="later">v0.2</td></tr>
+      <tr><td>资产利用矩阵</td><td>任何资产必须至少有两个消费方，否则不引入（囤而不用的资产是负债）</td><td class="later">v0.2+</td></tr>
+      <tr><td>捉虫 → 自检规则</td><td>每次被确认的错误，永久提高未来所有文章的自检下限</td><td class="mvp">MVP</td></tr>
+    </table>
+    <div class="metrics">
+      <div class="metric"><b>10 态</b><span>作品状态机（含搁置复活态）</span></div>
+      <div class="metric"><b>4 触发器</b><span>选题提议（报料/聚类/伏笔/复活）</span></div>
+      <div class="metric"><b>16 类</b><span>资产类型（创作者 10 + 读者 6）</span></div>
+      <div class="metric"><b>≤3/日</b><span>提议配额，防信息淹没</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="serif"><span class="no">05</span>版本边界</h2>
+    <div class="grid3">
+      <div class="card"><span class="k">MVP · v0.1</span><h3>跑通完整循环</h3><p>流水线主干 + 报料/捉虫 + 今日案头/看板/资产抽屉 + 碎片速记。验证两个命题：自检像不像真编辑；报料-采用是否真实发生。</p></div>
+      <div class="card"><span class="k">v0.2 · 共创与手感</span><h3>补齐读者三角色</h3><p>首读者内测体系、段落级三动作、引用管家、标题工坊、工坊橱窗、读者个人贡献页、读者关系台。</p></div>
+      <div class="card"><span class="k">v0.3 · 复利深化</span><h3>让资产越用越厚</h3><p>观点索引与 C3 自我矛盾、术语卡与 C6 一致性、伏笔触发器、内测-正式对照归因、写作节律仪表盘。</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    造物 · Atelier — 产品设计作品集 ｜ 完整 PRD 见仓库 <code>docs/01-prd.md</code> ｜ Demo 前后端源码见 <code>shared/ · server/ · app/</code> ｜ © 2026 戴宙辰
+  </div>
+</footer>
+</body>
+</html>
