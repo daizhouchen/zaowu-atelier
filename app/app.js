@@ -5,7 +5,7 @@
  * ============================================================ */
 'use strict';
 
-var App = { mode: null, state: null, view: 'workbench', currentWork: null };
+var App = { mode: null, state: null, view: 'workbench', currentWork: null, currentRead: null, editing: null };
 
 /* ---------------- API 适配层 ---------------- */
 var Api = {
@@ -42,7 +42,10 @@ var Api = {
         var args = {
           confirmProposal: [body.pid], rejectProposal: [body.pid, body.reason],
           createManualTopic: [body.title, body.tags], assemble: [body.wid],
-          addParagraph: [body.wid, body.text, body.kind], citeAsset: [body.wid, body.pid, body.assetRef],
+          addParagraph: [body.wid, body.text, body.kind],
+          updateParagraph: [body.wid, body.pid, body.text],
+          deleteParagraph: [body.wid, body.pid], renameWork: [body.wid, body.title],
+          citeAsset: [body.wid, body.pid, body.assetRef],
           confirmAI: [body.wid, body.pid], submitCheck: [body.wid],
           handleCheck: [body.wid, body.cid, body.action, body.reason],
           finalize: [body.wid], publish: [body.wid], retro: [body.wid], shelve: [body.wid, body.reason],
@@ -119,8 +122,10 @@ function act(name, body, okMsg) {
 /* ---------------- 路由 ---------------- */
 function route() {
   var h = location.hash.replace('#', '') || 'workbench';
-  if (h.indexOf('work/') === 0) { App.view = 'workbench'; App.currentWork = h.slice(5); }
-  else { App.view = h; App.currentWork = null; }
+  if (h.indexOf('work/') === 0) { App.view = 'workbench'; App.currentWork = h.slice(5); App.currentRead = null; }
+  else if (h.indexOf('read/') === 0) { App.view = 'read'; App.currentRead = h.slice(5); App.currentWork = null; }
+  else { App.view = h; App.currentWork = null; App.currentRead = null; }
+  App.editing = null;
   document.querySelectorAll('.topbar .nav').forEach(function (a) { a.classList.toggle('on', a.dataset.view === App.view); });
   render();
 }
@@ -129,6 +134,7 @@ function render() {
   var v = document.getElementById('view');
   var html = App.view === 'shop' ? renderShop()
     : App.view === 'vault' ? renderVault()
+    : App.view === 'read' ? renderRead(workById(App.currentRead))
     : (App.currentWork ? renderWorkDetail(workById(App.currentWork)) : renderWorkbench());
   v.innerHTML = '<div class="view-anim">' + html + '</div>';
 }
@@ -243,17 +249,21 @@ function stepperHtml(w) {
 function renderWorkDetail(w) {
   if (!w) return '<div class="card">作品不存在。<a href="#workbench">返回看板</a></div>';
   var h = '<div class="doc-head"><div class="crumb"><a href="#workbench">← 返回看板</a><span>/</span>' + badge(w.status) + '<span class="hint">' + esc(w.id) + '</span></div>' +
-    '<h1 class="serif">' + esc(w.title) + '</h1>' +
+    '<h1 class="serif">' + esc(w.title) + ' <button class="sm ghost" onclick="renameTitle(\'' + w.id + '\')" title="重命名">✎</button></h1>' +
     '<div class="origin">📌 ' + esc((w.topicOrigin && w.topicOrigin.rationale) || '') + '</div>' + stepperHtml(w) + '</div>';
 
   /* 起草编辑区 */
   if (w.status === 'drafting' || w.status === 'self_check') {
     var paras = w.paragraphs.map(function (p) {
-      var cls = 'para' + (p.kind === 'ai' ? ' ai' : '');
+      var cls = 'para' + (p.kind === 'ai' ? ' ai' : '') + (App.editing === p.id ? ' editing' : '');
       var lab = p.kind === 'ai' ? '<span class="plabel">AI 段落 · 待过目转正</span>' : '';
       var cites = p.citations.map(function (c) { return '<span class="cite">🔗 ' + esc(c.asset) + ' @' + esc(c.anchor) + '</span>'; }).join('');
-      var aiBtn = p.kind === 'ai' ? '<div class="rowline"><button class="sm" onclick="act(\'confirmAI\',{wid:\'' + w.id + '\',pid:\'' + p.id + '\'},\'已过目转正（authorship 底账记录）\')">👁 过目转正</button><span class="hint">铁律②：AI 起草 ≠ AI 署名，须逐段过目</span></div>' : '';
-      return '<div class="' + cls + '">' + lab + esc(p.text) + cites + aiBtn + '</div>';
+      var tools = '<span class="ptools"><button class="sm ghost" onclick="startEdit(\'' + w.id + '\',\'' + p.id + '\')">✎ 编辑</button><button class="sm ghost" onclick="delPara(\'' + w.id + '\',\'' + p.id + '\')">删</button></span>';
+      var body = App.editing === p.id
+        ? '<textarea id="pe-' + p.id + '">' + esc(p.text) + '</textarea><div class="rowline"><button class="pri sm" onclick="savePara(\'' + w.id + '\',\'' + p.id + '\')">保存</button><button class="sm" onclick="cancelEdit()">取消</button>' + (p.kind === 'ai' ? '<span class="hint">改动 AI 段落后将重新标为待过目</span>' : '') + '</div>'
+        : esc(p.text) + cites;
+      var aiBtn = (p.kind === 'ai' && App.editing !== p.id) ? '<div class="rowline"><button class="sm" onclick="act(\'confirmAI\',{wid:\'' + w.id + '\',pid:\'' + p.id + '\'},\'已过目转正（authorship 底账记录）\')">👁 过目转正</button><span class="hint">铁律②：AI 起草 ≠ AI 署名，须逐段过目</span></div>' : '';
+      return '<div class="' + cls + '">' + lab + (App.editing === p.id ? '' : tools) + body + aiBtn + '</div>';
     }).join('');
 
     var bundle = w.bundle.map(function (b) {
@@ -295,7 +305,7 @@ function renderWorkDetail(w) {
   }
   if (w.status === 'published' || w.status === 'retro') {
     h += '<div class="card"><h3>📮 已发布</h3><p>' + esc(w.declaration || '') + '</p><p>署名区：' + (w.credits.length ? w.credits.map(function (c) { return '<b>' + esc(c.name) + '</b>（' + esc(c.scope) + '，引用 ' + c.count + ' 处，锚点核验 ✓）'; }).join('、') : '无素材引用') + '</p>' +
-      '<div class="rowline">' + (w.status === 'published' ? '<button class="pri" onclick="act(\'retro\',{wid:\'' + w.id + '\'},\'复盘完成：创作档案归档定型（不可变）\')">复盘并归档 →</button>' : '') + '<a href="#shop"><button>去小铺看呈现</button></a></div></div>';
+      '<div class="rowline"><a href="#read/' + w.id + '"><button>📖 阅读页预览</button></a>' + (w.status === 'published' ? '<button class="pri" onclick="act(\'retro\',{wid:\'' + w.id + '\'},\'复盘完成：创作档案归档定型（不可变）\')">复盘并归档 →</button>' : '') + '</div></div>';
   }
   if (w.status === 'archived' && w.archive) {
     h += '<div class="card"><h3>📜 创作档案 <span class="hint">不可变</span></h3><p class="hint">装配 ' + w.archive.bundleSize + ' 项 ｜ 自检 ' + w.archive.checkReport.length + ' 条 ｜ 修订 ' + w.archive.revisions.length + ' 处 ｜ 归档于 ' + esc(w.archive.archivedAt) + '</p><a href="#shop"><button>在小铺看诞生档案</button></a></div>';
@@ -303,6 +313,33 @@ function renderWorkDetail(w) {
   return h;
 }
 
+function renameTitle(wid) {
+  var w = workById(wid);
+  Modal.show({
+    title: '重命名作品',
+    sub: '标题改动会记入编排日志（铁律③：一切留痕）。',
+    fields: [{ id: 'title', label: '新标题', value: w.title, required: true }],
+    okText: '保存标题',
+    onConfirm: function (v) { act('renameWork', { wid: wid, title: v.title }, '标题已更新'); }
+  });
+}
+function startEdit(wid, pid) { App.editing = pid; render(); var el = document.getElementById('pe-' + pid); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+function cancelEdit() { App.editing = null; render(); }
+function savePara(wid, pid) {
+  var el = document.getElementById('pe-' + pid);
+  var text = el ? el.value.trim() : '';
+  if (!text) return toast('段落内容不能为空', true);
+  App.editing = null;
+  act('updateParagraph', { wid: wid, pid: pid, text: text }, '段落已更新');
+}
+function delPara(wid, pid) {
+  Modal.show({
+    title: '删除这一段？',
+    sub: '删除动作会记入编排日志；引用锚点将随段落一并移除。',
+    okText: '删除', danger: true,
+    onConfirm: function () { act('deleteParagraph', { wid: wid, pid: pid }, '段落已删除（日志留痕）'); }
+  });
+}
 function addPara(wid, kind) {
   var text = document.getElementById('np-text').value.trim();
   if (!text && kind === 'user') return toast('先写点内容', true);
@@ -342,27 +379,16 @@ function renderShop() {
   var inProgress = s.works.filter(function (w) { return ['idea', 'drafting', 'self_check'].indexOf(w.status) >= 0; })[0];
 
   var works = published.map(function (w) {
-    var body = w.paragraphs.length ? w.paragraphs.map(function (p) { return '<p>' + esc(p.text) + '</p>'; }).join('') : '<p class="hint">（正文略）</p>';
-    var fixes = (w.revisions || []).filter(function (r) { return r.bugId; }).map(function (r) {
-      return '<div class="fix"><span class="tag">修订</span>' + esc(r.ts) + ' 经 @' + esc(r.by) + ' 指正：' + esc(r.note) + '<br><b>该纠错已写入自检规则库，未来同类错误自动拦截。</b></div>';
-    }).join('');
-    var checkStat = w.checks ? '自检 ' + w.checks.length + ' 条：采纳 ' + w.checks.filter(function (x) { return x.action === 'accept'; }).length + ' / 驳回 ' + w.checks.filter(function (x) { return x.action === 'reject'; }).length : '—';
-    return '<div class="article"><div class="ameta">发布于 ' + esc(w.publishedAt || w.timeline.published || '') + ' ｜ ' + esc(w.id) + '</div><h3 class="serif">' + esc(w.title) + '</h3><div class="body">' + body + '</div>' +
-      '<div class="credits">✍️ <b>本篇共创</b>：' + (w.credits && w.credits.length ? '素材由 ' + w.credits.map(function (x) { return '<b>' + esc(x.name) + '</b>（' + esc(x.scope) + '）'; }).join('、') + ' 报料 · 署名经引用锚点核验' : '本篇无读者素材引用') + '</div>' +
-      '<details><summary style="cursor:pointer;font-size:13px;color:var(--accent)">📜 诞生档案（创作档案公开字段投影 · 带锚点不可编造）</summary>' +
-      '<div class="arch"><div class="ab">' +
-        '<div class="row"><div class="k">选题源起</div><div>' + esc((w.topicOrigin && w.topicOrigin.rationale) || '手动建题') + '</div></div>' +
-        '<div class="row"><div class="k">装配</div><div>上下文包 ' + (w.bundle ? w.bundle.length : 0) + ' 项' + ((w.blockedBundle || []).length ? '，拦截未授权素材 ' + w.blockedBundle.length + ' 项' : '') + '</div></div>' +
-        '<div class="row"><div class="k">质量机制</div><div>' + checkStat + '</div></div>' +
-        '<div class="row"><div class="k">创作方式</div><div>' + esc(w.declaration || '') + '</div></div>' +
-      '</div></div></details>' + fixes +
-      '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;color:var(--accent)">🐛 发现错误？捉虫（确认后永久提高质量下限）</summary><div style="padding:10px 0">' +
-        '<div class="grid cols2"><div><label class="f">你的昵称</label><input id="bg-reader-' + w.id + '" placeholder="例：石头"></div>' +
-        '<div><label class="f">类型</label><select id="bg-type-' + w.id + '"><option>事实错误</option><option>数据过时</option><option>引用有误</option><option>错别字</option></select></div></div>' +
-        '<label class="f">原文引用</label><input id="bg-quote-' + w.id + '" placeholder="选中觉得有误的原文">' +
-        '<label class="f">证据（链接/说明）</label><input id="bg-ev-' + w.id + '" placeholder="https://…">' +
-        '<div class="rowline"><button class="pri" onclick="submitBug(\'' + w.id + '\')">提交捉虫</button></div></div></details>' +
-      '</div>';
+    var first = w.paragraphs.length ? w.paragraphs[0].text : '';
+    var excerpt = esc(first.length > 84 ? first.slice(0, 84) + '…' : first);
+    var bugCount = s.bugReports.filter(function (b) { return (b.wid || b.workId) === w.id; }).length;
+    var fixCount = (w.revisions || []).filter(function (r) { return r.bugId; }).length;
+    return '<a class="article" href="#read/' + w.id + '"><div class="ameta">发布于 ' + esc(w.publishedAt || w.timeline.published || '') + ' ｜ ' + esc(w.id) + ' ｜ ' + w.paragraphs.length + ' 段</div>' +
+      '<h3 class="serif">' + esc(w.title) + '</h3>' +
+      (excerpt ? '<div class="excerpt">' + excerpt + '</div>' : '') +
+      '<div class="ameta" style="margin-top:10px">✍️ 共创 ' + ((w.credits && w.credits.length) ? w.credits.map(function (x) { return '@' + esc(x.name); }).join(' ') : '无素材引用') +
+      (fixCount ? ' ｜ 📝 修订 ' + fixCount + ' 处' : '') + (bugCount ? ' ｜ 🐛 捉虫 ' + bugCount + ' 起' : '') + '</div>' +
+      '<div class="readmore">阅读全文 →</div></a>';
   }).join('');
 
   var wallTips = {}, wallBugs = {};
@@ -391,6 +417,51 @@ function renderShop() {
     '<div class="card"><h3>📦 素材卡与授权管理</h3>' + (myCards || '<div class="hint">暂无</div>') + '</div></div>' +
     '<h2 class="sec"><span class="no">②</span>贡献者墙 <small>排名货币 = 被采用的贡献，不是活跃度</small></h2>' +
     '<div class="wall"><div class="card"><h3>📮 报料上榜</h3>' + tipRows + '</div><div class="card"><h3>🐛 捉虫达人</h3>' + bugRows + '</div></div>';
+}
+
+/* ===== 阅读页 ===== */
+function renderRead(w) {
+  if (!w) return '<div class="card">作品不存在。<a href="#shop">返回小铺</a></div>';
+  if (['published', 'retro', 'archived'].indexOf(w.status) < 0)
+    return '<div class="card">《' + esc(w.title) + '》尚未发布（当前：' + SL[w.status] + '），暂无阅读页。<a href="#workbench">返回工作台</a></div>';
+  var s = App.state;
+  var byline = s.creator.name || s.creator.shopName;
+  var paras = w.paragraphs.map(function (p) {
+    var marks = p.citations.map(function (c) {
+      var m = s.materialCards.find(function (x) { return x.id === c.asset.split(':').pop(); });
+      return '<span class="rmark" title="🔗 ' + esc(c.asset) + ' @' + esc(c.anchor) + ' · 署名核验 ✓">' + (m ? '@' + esc(m.provider) : '素材') + '</span>';
+    }).join('');
+    return '<p>' + esc(p.text) + marks + '</p>';
+  }).join('');
+  var creditsLine = (w.credits && w.credits.length)
+    ? w.credits.map(function (c) { return '<div class="crow"><b>@' + esc(c.name) + '</b><span>' + esc(c.scope) + ' · 引用 ' + c.count + ' 处 · 锚点核验 ✓</span></div>'; }).join('')
+    : '<div class="hint">本篇无读者素材引用。</div>';
+  var checkStat = w.checks && w.checks.length ? '自检 ' + w.checks.length + ' 条：采纳 ' + w.checks.filter(function (x) { return x.action === 'accept'; }).length + ' / 驳回 ' + w.checks.filter(function (x) { return x.action === 'reject'; }).length : '—';
+  var fixes = (w.revisions || []).filter(function (r) { return r.bugId; }).map(function (r) {
+    return '<div class="fix"><span class="tag">修订</span>' + esc(r.ts) + ' 经 @' + esc(r.by) + ' 指正：' + esc(r.note) + ' —— 该纠错已写入自检规则库。</div>';
+  }).join('');
+
+  return '<div class="reader"><a class="rback" href="#shop">← 返回小铺</a>' +
+    '<div class="rtitle"><div class="rkicker">' + esc(s.creator.shopName) + ' · ' + esc(w.id) + '</div>' +
+    '<h1 class="serif">' + esc(w.title) + '</h1>' +
+    '<div class="rmeta">文 / ' + esc(byline) + ' ｜ 发布于 ' + esc(w.publishedAt || w.timeline.published || '') + '</div></div>' +
+    '<div class="rbody">' + paras + '</div>' +
+    '<div class="rdiv">◇ ◇ ◇</div>' +
+    '<div class="rsec"><h4>✍️ 本篇共创</h4>' + creditsLine + '</div>' +
+    '<div class="rsec"><h4>📜 诞生档案 <span class="hint">创作档案公开字段投影 · 带锚点不可编造</span></h4><div class="arch"><div class="ab">' +
+      '<div class="row"><div class="k">选题源起</div><div>' + esc((w.topicOrigin && w.topicOrigin.rationale) || '手动建题') + '</div></div>' +
+      '<div class="row"><div class="k">装配</div><div>上下文包 ' + (w.bundle ? w.bundle.length : 0) + ' 项' + ((w.blockedBundle || []).length ? '，拦截未授权素材 ' + w.blockedBundle.length + ' 项' : '') + '</div></div>' +
+      '<div class="row"><div class="k">质量机制</div><div>' + checkStat + '</div></div>' +
+      '<div class="row"><div class="k">创作方式</div><div>' + esc(w.declaration || '') + '</div></div>' +
+    '</div></div></div>' +
+    (fixes ? '<div class="rsec"><h4>📝 修订痕迹</h4>' + fixes + '</div>' : '') +
+    '<div class="rsec rbug"><h4>🐛 发现错误？捉虫 <span class="hint">确认后永久提高质量下限，捉虫人上贡献者墙</span></h4>' +
+      '<div class="grid cols2"><div><label class="f">你的昵称</label><input id="bg-reader-' + w.id + '" placeholder="例：石头"></div>' +
+      '<div><label class="f">类型</label><select id="bg-type-' + w.id + '"><option>事实错误</option><option>数据过时</option><option>引用有误</option><option>错别字</option></select></div></div>' +
+      '<label class="f">原文引用</label><input id="bg-quote-' + w.id + '" placeholder="选中觉得有误的原文">' +
+      '<label class="f">证据（链接/说明）</label><input id="bg-ev-' + w.id + '" placeholder="https://…">' +
+      '<div class="rowline"><button class="pri" onclick="submitBug(\'' + w.id + '\')">提交捉虫</button></div></div>' +
+  '</div>';
 }
 
 function submitTip() {
@@ -479,13 +550,14 @@ function renderVault() {
 window.addEventListener('hashchange', route);
 document.getElementById('btn-reset').addEventListener('click', function () {
   Modal.show({
-    title: '重置为种子数据？',
-    sub: '当前 demo 进度将被清空，回到「老周的小铺」初始状态。',
-    okText: '重置', danger: true,
-    onConfirm: function () { act('reset', {}, '已重置为种子数据'); }
+    title: '恢复初始数据？',
+    sub: '当前内容将被清空，回到「老周的小铺」初始状态。',
+    okText: '恢复', danger: true,
+    onConfirm: function () { act('reset', {}, '已恢复初始数据'); }
   });
 });
 
+document.getElementById('view').innerHTML = '<div class="loading"><div class="spinner"></div><div>正在打开工坊…</div></div>';
 Api.init().then(function (st) {
   App.state = st;
   var mb = document.getElementById('mode-badge');
