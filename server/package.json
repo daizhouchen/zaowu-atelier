@@ -1,0 +1,13 @@
+{
+  "name": "zaowu-atelier-server",
+  "version": "0.1.0",
+  "description": "造物 · Atelier — 创作者共创工坊 demo 后端（Express REST + 文件持久化，引擎与前端共用 shared/engine.js）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "license": "MIT"
+}
