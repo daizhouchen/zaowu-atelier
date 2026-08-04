@@ -92,7 +92,7 @@
         }
       ],
       logs: [
-        { ts: '2026-08-05 09:00', kind: 'Writeback', detail: '种子数据载入：造物 · Atelier demo 开张，欢迎来到老周的小铺。', valid: true }
+        { ts: '2026-08-05 09:00', kind: 'Writeback', detail: '种子数据载入：造物 · Atelier 开张，欢迎来到老周的小铺。', valid: true }
       ]
     };
   };
