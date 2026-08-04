@@ -4,11 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>造物 · Atelier — 产品 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="topbar">
-  <b class="serif">造物 · Atelier</b>
+  <div class="brand">
+    <div class="mark">造</div>
+    <div><b class="serif">造物 · Atelier</b><small>流水线 · 读者共创 · 资产沉淀</small></div>
+  </div>
   <span class="mode" id="mode-badge">连接中…</span>
   <div class="sp"></div>
   <a class="nav on" data-view="workbench" href="#workbench" onclick="location.hash='workbench';return false">工作台</a>
@@ -25,6 +31,7 @@
 </footer>
 
 <div id="toast" class="toast"></div>
+<div id="modal-root"></div>
 
 <script src="../shared/engine.js"></script>
 <script src="../shared/seed.js"></script>
