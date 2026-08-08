@@ -33,6 +33,87 @@
         { id: 'CR-001', rule: '涉及「收入」数据须核对统计口径与年份', source: '捉虫 BG-001 · 确认', keywords: ['收入'], hits: 3 },
         { id: 'CR-002', rule: '负样本：亲历叙事类文章中单一案例可作引子（老周认为可接受）', source: '驳回', keywords: null, hits: 0, negative: true }
       ],
+      /* ---------- v0.2 资产：首读者体系 / 引用源 / 快照 / 标题实验 ---------- */
+      betaPool: [
+        { name: '阿树', tags: ['转行', '手艺'], joinedAt: '2026-06-10 10:00' },
+        { name: '青梧', tags: ['转行'], joinedAt: '2026-06-12 10:00' },
+        { name: '麦子', tags: ['收入', '副业'], joinedAt: '2026-06-20 10:00' },
+        { name: '白桦', tags: ['手艺'], joinedAt: '2026-07-01 10:00' },
+        { name: '石头', tags: ['远程办公'], joinedAt: '2026-07-05 10:00' }
+      ],
+      readerScores: {
+        '阿树': { score: 8, miss: 0, history: [{ ts: '2026-07-31 10:05', delta: 5, why: '反馈被标「极有价值」' }, { ts: '2026-07-31 10:02', delta: 3, why: '反馈被采纳' }] },
+        '青梧': { score: 3, miss: 0, history: [{ ts: '2026-07-31 10:02', delta: 3, why: '反馈被采纳' }] },
+        '麦子': { score: 3, miss: 0, history: [{ ts: '2026-07-31 10:02', delta: 3, why: '反馈被采纳' }] },
+        '白桦': { score: 3, miss: 0, history: [{ ts: '2026-07-31 10:02', delta: 3, why: '反馈被采纳' }] },
+        '石头': { score: -2, miss: 1, history: [{ ts: '2026-07-31 10:00', delta: -2, why: '内测窗口内未反馈' }] }
+      },
+      betaRounds: [
+        {
+          id: 'BR-001', wid: 'W-002', round: 1,
+          readers: ['阿树', '青梧', '麦子', '白桦', '石头'], hours: 48,
+          openedAt: '2026-07-29 10:00', status: 'closed', closedAt: '2026-07-31 10:00',
+          feedbacks: [
+            { id: 'BF-001', reader: '阿树', pid: 'P3', type: '不相信', note: '「越来越多」没数据，县城样本太少', ts: '2026-07-29 14:00' },
+            { id: 'BF-002', reader: '青梧', pid: 'P3', type: '不相信', note: '身边没见过几个，建议限定范围', ts: '2026-07-29 16:00' },
+            { id: 'BF-003', reader: '麦子', pid: 'P3', type: '不相信', note: '结论下得比案例快', ts: '2026-07-30 09:00' },
+            { id: 'BF-004', reader: '白桦', pid: 'P3', type: '不相信', note: '想看第二个人的例子', ts: '2026-07-30 11:00' },
+            { id: 'BF-005', reader: '阿树', pid: 'P2', type: '想要更多', note: '账本那段太好了，想看具体一单的拆账', ts: '2026-07-29 14:10' },
+            { id: 'BF-006', reader: '麦子', pid: 'P2', type: '想要更多', note: '每单定价怎么定的？', ts: '2026-07-30 09:05' },
+            { id: 'BF-007', reader: '青梧', pid: 'P1', type: '自由批注', note: '开头的刨花味很抓人', ts: '2026-07-29 16:05' },
+            { id: 'BF-008', reader: '白桦', pid: 'P2', type: '自由批注', note: '「安全感」这个词用得准', ts: '2026-07-30 11:05' }
+          ],
+          doubts: [],
+          report: {
+            total: 5, closedAt: '2026-07-31 10:00',
+            heat: { P1: 1, P2: 3, P3: 4 },
+            doubts: [],
+            items: [
+              { id: 'BI-P3-不相信', pid: 'P3', type: '不相信', count: 4, readers: ['阿树', '青梧', '麦子', '白桦'], notes: ['@阿树：「越来越多」没数据，县城样本太少', '@青梧：身边没见过几个，建议限定范围'], strong: true, action: 'accept', reason: '强信号（4/5），结论限定为县城观察' },
+              { id: 'BI-P2-想要更多', pid: 'P2', type: '想要更多', count: 2, readers: ['阿树', '麦子'], notes: ['@阿树：想看具体一单的拆账'], strong: false, action: 'gold', reason: '拆账视角极有价值，下篇展开' },
+              { id: 'BI-P1-自由批注', pid: 'P1', type: '自由批注', count: 1, readers: ['青梧'], notes: ['@青梧：开头的刨花味很抓人'], strong: false, action: 'reject', reason: '正向批注，无需修改' }
+            ]
+          }
+        }
+      ],
+      citationBank: [
+        { id: 'CB-001', url: 'https://stats.example.gov.cn/yearbook/2025/income', ts: '2026-07-30 10:00', fresh: 'stale', staleBy: 'BG-001', usedBy: ['W-002'] },
+        { id: 'CB-002', url: 'https://research.example.com/flex-employment-2026', ts: '2026-07-30 10:05', fresh: 'valid', usedBy: ['W-002'] },
+        { id: 'CB-003', url: 'https://meta.example.org/remote-work-productivity', ts: '2026-06-15 09:00', fresh: 'valid', usedBy: [] }
+      ],
+      versionSnapshots: [
+        {
+          id: 'VS-001', wid: 'W-002', label: '内测前', ts: '2026-07-29 10:00',
+          paragraphs: [
+            { id: 'P1', kind: 'user', confirmed: true, text: '小鹿的木工坊在县城一条老巷子里，推门先闻到刨花的味道。去年这时候，她还在大厂做增长，每天盯着留存曲线；现在她盯着的是本子和刨刀。她说最直观的变化是收入：降了四成，但每一块钱都看得见来路。', citations: [{ asset: 'MC-001', anchor: 'A-W-002-P1' }] },
+            { id: 'P2', kind: 'user', confirmed: true, text: '账本是慢生意的核心。工坊前三个月没有一分进账，她靠给本地民宿做家具翻新维持；第五个月开始有熟客转介。', citations: [] },
+            { id: 'P3', kind: 'user', confirmed: true, text: '转行不是逃离，更像一次重新定价。像小鹿这样的人越来越多，他们不是不想赚快钱，是想赚看得明白的钱。', citations: [] }
+          ]
+        },
+        {
+          id: 'VS-002', wid: 'W-002', label: '修改后', ts: '2026-07-31 15:00',
+          paragraphs: [
+            { id: 'P1', kind: 'user', confirmed: true, text: '小鹿的木工坊在县城一条老巷子里，推门先闻到刨花的味道。去年这时候，她还在大厂做增长，每天盯着留存曲线；现在她盯着的是本子和刨刀。她说最直观的变化是收入：降了四成，但每一块钱都看得见来路。', citations: [{ asset: 'MC-001', anchor: 'A-W-002-P1' }] },
+            { id: 'P2', kind: 'user', confirmed: true, text: '账本是慢生意的核心。工坊前三个月没有一分进账，她靠给本地民宿做家具翻新维持；第五个月开始有熟客转介。她把每一单的材料、工时、定价都记在一个本子上——她说这不是财务习惯，是安全感。', citations: [] },
+            { id: 'P3', kind: 'user', confirmed: true, text: '转行不是逃离，更像一次重新定价：把时间卖给谁、按什么计价、由谁说了算。县城里像小鹿这样的人越来越多，他们不是不想赚快钱，是想赚看得明白的钱。', citations: [] }
+          ]
+        }
+      ],
+      titleLog: [
+        {
+          id: 'TL-001', wid: 'W-002', ts: '2026-07-30 15:00',
+          candidates: [
+            { title: '手艺经济：慢生意的账本', why: '原题 · 保留选题源起', by: 'rules' },
+            { title: '慢生意的账本：小鹿的转行第一年', why: '人物具象化 · 命中「想看真实转行故事」信号（3 条）', by: 'rules' },
+            { title: '转行之后，收入到底怎么样？', why: '提问式 · 直接引用 @麦子的需求信号原话', by: 'rules' },
+            { title: '收入降四成之后：一本看得见来路的账', why: '数据钩子 · 适合 newsletter 分发', by: 'rules' },
+            { title: '「每一块钱都看得见来路」', why: '引语式 · 命中风格档案「引语开场」习惯', by: 'rules' }
+          ],
+          chosen: '慢生意的账本：小鹿的转行第一年'
+        }
+      ],
+      authRequests: [],
+      followers: [{ reader: '白桦', wid: 'W-001', ts: '2026-08-03 10:00' }],
       materialCards: [
         {
           id: 'MC-001', provider: '小鹿',
@@ -85,9 +166,12 @@
             { id: 'CK-002', category: 'C1', issue: '全称结论支撑不足', desc: '「越来越多」为趋势结论，引用支撑不足 2 处。', confidence: 'medium', anchor: { p: 'P3', quote: '县城里像小鹿这样的人越来越多' }, suggestion: '补充第二个案例或数据，或限定范围。', action: 'reject', reason: '亲历叙事类文章，单一案例可作引子' }
           ],
           skipped: [], credits: [{ ref: 'MC-001', name: '@小鹿', scope: '具名引用', count: 1 }], creditsVerified: true,
-          revisions: [{ ts: '2026-08-02 16:00', by: '青梧', bugId: 'BG-001', note: '收入降幅数据补注统计口径（约 38%，按 2025 年鉴）' }],
-          timeline: { idea: '2026-07-29 09:00', drafting: '2026-07-29 11:00', self_check: '2026-07-30 10:00', finalized: '2026-07-30 15:00', published: '2026-08-01 09:00' },
-          declaration: '本文由 老周 撰写，无 AI 段落。自检 2 条意见：采纳 1 / 驳回 1（理由已写回规则库）。素材来自读者报料，署名经引用锚点核验。',
+          revisions: [
+            { ts: '2026-07-31 12:00', betaItem: 'BI-P3-不相信', note: '采纳内测反馈「不相信」（P3，4/5 人标注）：结论限定为县城观察，补「重新定价」三问', by: '阿树、青梧、麦子、白桦' },
+            { ts: '2026-08-02 16:00', by: '青梧', bugId: 'BG-001', note: '收入降幅数据补注统计口径（约 38%，按 2025 年鉴）' }
+          ],
+          timeline: { idea: '2026-07-29 09:00', drafting: '2026-07-29 11:00', self_check: '2026-07-29 09:30', beta: '2026-07-29 10:00', revising: '2026-07-31 11:00', finalized: '2026-07-31 16:00', published: '2026-08-01 09:00' },
+          declaration: '本文由 老周 撰写，无 AI 段落。自检 2 条意见：采纳 1 / 驳回 1（理由已写回规则库）。经 5 位首读者内测（8 条标注，采纳 2 项，含 1 条 ≥60% 共识强信号）。素材来自读者报料，署名经引用锚点核验。',
           publishedAt: '2026-08-01 09:00', retro: null
         }
       ],
