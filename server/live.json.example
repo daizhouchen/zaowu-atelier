@@ -1,0 +1,7 @@
+{
+  "baseUrl": "https://api.example.com/v1",
+  "apiKey": "sk-你的密钥",
+  "model": "qwen3.5-plus",
+  "timeoutMs": 60000,
+  "_说明": "复制为 live.json 放在本目录（不入库不上传）。任意 OpenAI 兼容 chat/completions 服务均可；未配置时 AI 自动走规则引擎降级链路，产品全功能可用。"
+}
